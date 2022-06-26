@@ -1,0 +1,2 @@
+#	Show a message when an interact-banned player joins.
+no_touch_griefer_joinmessage (Build inside player) bool true
