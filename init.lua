@@ -63,3 +63,37 @@ minetest.register_chatcommand("interactban", {
 		end
 	end
 })
+
+minetest.register_chatcommand("ib_bulk", {
+	description = "Bulk process a list of IP addresses from /interactban.txt",
+	privs = { ban = true },
+	func = function(name, param)
+		local st = {
+			lines = 0,
+			processed = 0,
+			invalid = 0}
+
+		local file = io.open(minetest.get_worldpath().."/interactban.txt", "r")
+		for ip in file:lines() do
+			if ip ~= '' and string.sub(ip,1,1) ~= "#" then -- Ignore blank lines and comments prepended with #
+				st.lines = st.lines + 1
+				if is_ipv4(ip) then
+					interact_ban(ip)
+					st.processed = st.processed + 1
+				else
+					st.invalid = st.invalid + 1
+				end
+			end
+		end
+
+		local chatmsg = yellow("Successfully processed ")..red(st.processed)..yellow(" lines")
+
+		if st.invalid == 0 and st.lines == st.processed then
+			chatmsg = chatmsg..yellow(".")
+		else
+			chatmsg = chatmsg..yellow(" out of ")..red(st.lines)..yellow(" (")..red(st.invalid)..yellow(" invalid)")
+		end
+
+		minetest.chat_send_player(name, chatmsg)
+	end
+})
