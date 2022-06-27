@@ -32,6 +32,10 @@ local function interact_ban(ip)
 	storage:set_int(ip, 1)
 end
 
+local function interact_unban(ip)
+	storage:set_string(ip, "")
+end
+
 minetest.register_on_joinplayer(function(player)
 	local playername = player:get_player_name()
 	local ip = minetest.get_player_ip(playername)
@@ -95,5 +99,21 @@ minetest.register_chatcommand("ib_bulk", {
 		end
 
 		minetest.chat_send_player(name, chatmsg)
+	end
+})
+
+minetest.register_chatcommand("interactunban", {
+	params = "<ip>",
+	description = "Remove an interact-banned IP.",
+	privs = { ban = true },
+	func = function(name, param)
+		if not param then return end
+
+		if is_ipv4(param) then -- IP
+			interact_unban(param)
+			minetest.chat_send_player(name, yellow("Successfully unbanned the IP "..red(param).."."))
+		else
+			minetest.chat_send_player(name, red("Invalid IP address."))
+		end
 	end
 })
