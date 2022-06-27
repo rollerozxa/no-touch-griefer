@@ -20,7 +20,7 @@ local function red   (message) return minetest.colorize("#ff0000", message) end
 
 local function revoke_interact(name)
 	local pri = minetest.get_player_privs(name)
-	pri["interact"] = false
+	pri["interact"] = nil
 	minetest.set_player_privs(name, pri)
 
 	if minetest.settings:get_bool('no_touch_griefer_joinmessage', true) then
