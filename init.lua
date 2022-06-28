@@ -4,7 +4,7 @@ local storage = minetest.get_mod_storage()
 function is_ipv4(ip)
 	if not ip then return false end
 
-	octets = 0
+	local octets = 0
 	for octet in ip:gmatch('[^.%s]+') do
 		octets = octets + 1
 		octet = tonumber(octet)
