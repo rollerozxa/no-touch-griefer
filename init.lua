@@ -78,6 +78,12 @@ minetest.register_chatcommand("ib_bulk", {
 			invalid = 0}
 
 		local file = io.open(minetest.get_worldpath().."/interactban.txt", "r")
+
+		if file == nil then
+			minetest.chat_send_player(name, red("Could not find an interactban.txt file in your world folder."))
+			return
+		end
+
 		for ip in file:lines() do
 			if ip ~= '' and string.sub(ip,1,1) ~= "#" then -- Ignore blank lines and comments prepended with #
 				st.lines = st.lines + 1
