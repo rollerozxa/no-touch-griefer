@@ -1,7 +1,8 @@
+no_touch_griefer = {}
 
 local storage = minetest.get_mod_storage()
 
-function is_ipv4(ip)
+local function is_ipv4(ip)
 	if not ip then return false end
 
 	local octets = 0
@@ -28,14 +29,6 @@ local function revoke_interact(name)
 	end
 end
 
-local function interact_ban(ip)
-	storage:set_int(ip, 1)
-end
-
-local function interact_unban(ip)
-	storage:set_string(ip, "")
-end
-
 minetest.register_on_joinplayer(function(player)
 	local playername = player:get_player_name()
 	local ip = minetest.get_player_ip(playername)
@@ -43,6 +36,23 @@ minetest.register_on_joinplayer(function(player)
 		revoke_interact(playername)
 	end
 end)
+
+-- Public API
+
+function no_touch_griefer.check_ban(ip)
+	return storage:get_int(ip) == 1
+end
+
+function no_touch_griefer.ban(ip)
+	storage:set_int(ip, 1)
+end
+
+function no_touch_griefer.unban(ip)
+	storage:set_string(ip, "")
+end
+
+
+-- Admin commands
 
 minetest.register_chatcommand("interactban", {
 	params = "<ip | playername>",
@@ -52,12 +62,12 @@ minetest.register_chatcommand("interactban", {
 		if not param then return end
 
 		if is_ipv4(param) then -- IP
-			interact_ban(param)
+			no_touch_griefer.ban(param)
 			minetest.chat_send_player(name, yellow("Successfully interact-banned the IP "..red(param).."."))
 		else -- Player's IP
 			local playerip = minetest.get_player_ip(param)
 			if playerip then
-				interact_ban(playerip)
+				no_touch_griefer.ban(playerip)
 				minetest.chat_send_player(name, yellow("Successfully interact-banned the player ")..red(param)..yellow(". (IP: ")..red(playerip)..yellow(")"))
 				-- Since they're online, revoke their interact privs right heckin' now
 				revoke_interact(param)
@@ -88,7 +98,7 @@ minetest.register_chatcommand("ib_bulk", {
 			if ip ~= '' and string.sub(ip,1,1) ~= "#" then -- Ignore blank lines and comments prepended with #
 				st.lines = st.lines + 1
 				if is_ipv4(ip) then
-					interact_ban(ip)
+					no_touch_griefer.ban(ip)
 					st.processed = st.processed + 1
 				else
 					st.invalid = st.invalid + 1
@@ -116,7 +126,7 @@ minetest.register_chatcommand("interactunban", {
 		if not param then return end
 
 		if is_ipv4(param) then -- IP
-			interact_unban(param)
+			no_touch_griefer.unban(param)
 			minetest.chat_send_player(name, yellow("Successfully unbanned the IP "..red(param).."."))
 		else
 			minetest.chat_send_player(name, red("Invalid IP address."))
